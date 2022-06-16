@@ -3,10 +3,10 @@ from pygame.locals import *
 import random
 
 
-pygame.init()  # Inicializujte (spustí) všetky moduly pygame
+pygame.init()  # Inicializuje (spustí) všetky moduly pygame
 
 clock = pygame.time.Clock()
-fps = 60
+fps = 60 #rychlosť hry
 
 #velkosť okna
 screen_width = 864
@@ -54,9 +54,9 @@ class Bird(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.images = []
-        self.index = 0
+        self.index = 2
         self.counter = 0
-        for num in range (1,4):
+        for num in range (1,4): #tu mi loaduje obrazky ako animaciu vtaka (1,2,3,1,2,3,...)
             img = pygame.image.load(f"img/bird{num}.png")
             self.images.append(img)
         self.image = self.images[self.index]
@@ -70,37 +70,37 @@ class Bird(pygame.sprite.Sprite):
         if flying == True:
             
         #aplikovanie gravitacie
-            self.vel += 0.5
-            if self.vel > 8:
-                self.vel = 8
+            self.vel += 0.5 #velkost vysky vyskoku po kliknuti mysou 
+            if self.vel > 8: #rychlost padu smerom dole
+                self.vel = 8 #rychlost padu (ked dam 80, hned spadne)
             if self.rect.bottom < 768:
                 self.rect.y += int(self.vel)
 
 
         if game_over == False:
             #skok
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False: #ine ako 1 (vtak neskace pri kliku, pada)
                 self.clicked = True
-                self.vel = -10
-            if pygame.mouse.get_pressed()[0] == 0:
+                self.vel = -10 #ako vysoko vtak skace
+            if pygame.mouse.get_pressed()[0] == 0: #ak 1 a drzim klik, vtak stupa. Ine = pada (pri kliku nejde hore)
                 self.clicked = False
                 
-            #animacia (asi)
-            self.counter += 1
-            flap_cooldown = 5
+            #animacia
+            self.counter += 1 #rychlost striedania animacii
+            flap_cooldown = 5 #cim vacsie cislo, tym dlhsia doba striedania animacii
 
             if self.counter > flap_cooldown:
-                self.counter = 0
-                self.index += 1
+                self.counter = 0 #vacsie cislo = rychlejsie mavanie kridlom
+                self.index += 1 #vacsie cislo - neanimuje
                 if self.index >= len(self.images):
-                    self.index = 0
+                    self.index = 0 #zacina to nulou
             self.image = self.images[self.index]
 
     
             #rotacia vtaka
             self.image = pygame.transform.rotate(self.images[self.index], self.vel * -1.5)  # ako sa vtak naklana pri lete (ked dam 8 tak sa až otáča,..)
         else:
-            self.image = pygame.transform.rotate(self.images[self.index], -90) #ako vtak spadne na zem (pri 10 takmer vodorovne a pri 90 zobakom dole)
+            self.image = pygame.transform.rotate(self.images[self.index], -90) #stupne, ako vtak spadne na zem (pri 10 takmer vodorovne a pri 90 zobakom dole)
 
 
 class Pipe(pygame.sprite.Sprite):
@@ -112,14 +112,16 @@ class Pipe(pygame.sprite.Sprite):
         #pozicia 1 je od vrchu, -1 je od spodu
         if position == 1:
             self.image = pygame.transform.flip(self.image, False, True)
-            self.rect.bottomleft = [x,y - int(pipe_gap / 2)] #(možno) výška stlpu od steny (cim mensie cislo, tym menej stlp vidno)
+            self.rect.bottomleft = [x,y - int(pipe_gap / 2)] #(možno) výška stlpu od steny (cim mensie cislo, tym menej stlp vidno) - ###proste zmeni medzeru medzi stlpmi
         if position == -1:
             self.rect.topleft = [x,y + int(pipe_gap / 2)]
 
+    #rychlost scrollu hry - ako postupuju stlpy v hre 
     def update(self):
             self.rect.x  -= scroll_speed
-            if self.rect.right < 0:
+            if self.rect.right < 0: #kedy stlpy zanikaju vlavo - 500 (cca v polke obrazovky)
                 self.kill()
+
 
 class Button():
     def __init__(self, x, y, image):
@@ -137,7 +139,7 @@ class Button():
 
         #skontroluje, či je myš na buttone
         if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1:
+            if pygame.mouse.get_pressed()[0] == 1:  #1, inak nejde klik button
                 action = True
 
 
@@ -151,20 +153,15 @@ class Newbutton(Button):
     def __init__(self, x, y, image, ):
         super().__init__(x, y, image)
 
-
-
-
-
-
 bird_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
 
-flappy = Bird(100,int(screen_height / 2))
+flappy = Bird(100,int(screen_height / 2)) #prve cislo - vzdialoenost vtaka od laveho boku obrazovky ##druhe kde na zaciatku 1. hry je vtak
 
 bird_group.add(flappy)
 
 #vytvorí reštart button
-button = Button(screen_width //2 - 50, screen_height // 2 - 100, button_img)
+button = Button(screen_width //2 - 50, screen_height // 2 - 100, button_img) #pozicia buttonu
 newbutton = Newbutton(screen_width //2 - 50, screen_height // 2 - 100, button1_img)
 
 
@@ -192,7 +189,7 @@ while run:
             pass_pipe = True
         if pass_pipe == True:
             if bird_group.sprites()[0].rect.left > pipe_group.sprites()[0].rect.right:
-                score += 1
+                score += 1 #pridavanie skore ked prejdem stlp
                 pass_pipe = False
 
     draw_text(str(score), font, white, int(screen_width / 2), 20)
@@ -233,7 +230,6 @@ while run:
             if newbutton.draw():
                 game_over = False
                 score = reset_game()
-
             
 
 
